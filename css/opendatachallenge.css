@@ -6,6 +6,11 @@
 body {
 	font-family: "HelveticaNeueLT Std", "Arial", "Roboto";
   padding-top: 50px;
+	background: url('../img/bg.png');
+}
+
+body,html {
+	height: 100%;
 }
 .starter-template {
   padding: 40px 15px;
@@ -14,7 +19,7 @@ body {
 
 .wi {
 	font-size: 40px;
-  color: #6ad;
+  color: #678;
 	margin-top: 10px;
 	margin-bottom: 10px;
 }
@@ -66,7 +71,7 @@ div.trips  {
 div.leg {
 	margin-top: 0px;
 	margin-bottom: 10px;
-	background: #eee;
+	background: #f8f8f8;
 	padding: 10px 0px;
 }
 
@@ -91,14 +96,9 @@ span.emph {
 	-webkit-animation: drehen 2s linear infinite;
 }
 
-.loader {
-	text-align: center;
-	font-size: 200%;
-	margin: 40px;
-}
-
 .panel-default>.panel-heading {
 	background: #eee;
+  border-top: 2px solid #e22;
 }
 
 .panel{  
@@ -128,4 +128,98 @@ span.emph {
 
 .wi-on-left {
 	margin-left: 20px;
+}
+
+.autocomplete input {
+display: block;
+  width: 100%;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+  -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+
+.form-control, .input-group-addon {
+	border-radius: 0px;
+}
+
+.navbar-fixed-bottom, .navbar-fixed-top, .navbar-static-top {
+  box-shadow: 0px 4px 5px 0px rgba(0,0,0,.05);
+}
+
+.fill {
+	background: #f8f8f8;
+	min-height: 100%;
+	height: 100%;
+	box-shadow: 0px 0px 15px 0px rgba(0,0,0,.3);
+}
+
+.glyphicon-time {
+	color: #811;
+}
+
+
+.ontime {
+	color: #444;
+	font-size: 90%;
+}
+
+.delayed {
+	color: #da2;
+	font-size: 90%;
+}
+
+.verydelayed {
+	color: #b11;
+	font-size: 90%;
+}
+
+.navbar-inverse .navbar-nav>li>a{
+	color: #fff;
+}
+
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:focus, .navbar-inverse .navbar-nav>.open>a:hover {
+	color: #444;
+}
+
+.animate-trips.ng-hide {
+opacity: 0;
+}
+
+.animate-trips {
+	opacity: 1;
+	transition: all 1s;
+}
+
+.loader.ng-hide {
+	opacity: 0;
+}
+
+
+.loader {
+	position: absolute;
+	opacity: 1;
+	transition: all 1s;
+	z-index: 1000;
+	font-size: 200%;
+  margin-top: 60px;
+  left: 50%;
+  width: 100%;
+}
+
+.footer {
+  position: fixed;
+	bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #f8f8f8;
 }

@@ -1,76 +1,79 @@
-angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhackathonCtrl', ['$scope','$http', function($scope, $http) {
+moment.locale('de', {});
+
+angular.module('dbhackathon', ['autocomplete', 'ngAnimate', 'ui.bootstrap.datetimepicker']).controller('dbhackathonCtrl', ['$scope','$http', function($scope, $http) {
 	console.log('ready');
 	$scope.live = true;
 	
 	$scope.suggestLocations = $scope.live?'http://10.0.0.2:8080/dbodtc-web/suggestLocations?text=':'result.json?';
 	$scope.queryTrips = function(vonId, nachId){
-		return $scope.live?'http://10.0.0.2:8080//dbodtc-web/queryTrips?fromId='+vonId+'&toId='+nachId:'result.json?';
-	} 
+		return $scope.live?'http://10.0.0.2:8080//dbodtc-web/queryTrips?fromId='+vonId+'&toId='+nachId+'&timestamp='+Math.round(new Date($scope.startTrip).getTime()):'result.json?';
+	}
 	$scope.vonList = [];
 	$scope.vonMap = {};
 	$scope.nachList = [];
 	$scope.nachMap = {};
 	$scope.trips = [];
 	$scope.absZero = 273.15;
+	$scope.startTrip = new Date();
 	
 	$scope.weatherMap = {
 		day:{
-			951: "wi-day-sunny",
-			952: "light breeze",
-			953: "gentle breeze",
-			954: "wi-day-cloudy-windy",
-			955: "wi-day-cloudy-windy",
-			956: "wi-day-cloudy-windy",
-			957: "wi-day-cloudy-gusts",
-			958: "wi-day-cloudy-gusts",
-			959: "wi-day-cloudy-gusts",
-			960: "wi-day-storm-showers",
-			961: "wi-day-thunderstorm",
-			962: "wi-day-thunderstorm",
-			800: "wi-day-cloudy",
-			801: "wi-day-cloudy",
-			802: "wi-cloudy",
-			803: "wi-cloudy",
-			804: "wi-fog",
-			500: "wi-day-rain-mix",
-			501: "wi-day-showers",
-			502: "wi-day-rain",
-			503: "wi-day-rain",
-			504: "wi-day-rain",
-			511: "wi-day-hail",
-			520: "wi-day-showers",
-			521: "wi-day-showers",
-			522: "wi-day-showers",
-			531: "wi-day-showers"
+			951: {icon:"wi-day-sunny", description:"ruhig", empfehlung: ""},
+			952: {icon:"wi-day-sunny", description:"leichte Briese", empfehlung: ""},
+			953: {icon:"wi-day-sunny", description:"leichte Briese", empfehlung: ""},
+			954: {icon:"wi-day-cloudy-windy", description:"windig", empfehlung: ""},
+			955: {icon:"wi-day-cloudy-windy", description:"windig", empfehlung: ""},
+			956: {icon:"wi-day-cloudy-windy", description:"windig", empfehlung: ""},
+			957: {icon:"wi-day-cloudy-gusts", description:"starker Wind", empfehlung: ""},
+			958: {icon:"wi-day-cloudy-gusts", description:"starker Wind", empfehlung: ""},
+			959: {icon:"wi-day-cloudy-gusts", description:"starke Böen", empfehlung: ""},
+			960: {icon:"wi-day-storm-showers", description:"sehr starke Böen", empfehlung: ""},
+			961: {icon:"wi-day-thunderstorm", description:"Gewitter", empfehlung: ""},
+			962: {icon:"wi-day-thunderstorm", description:"Gewitter", empfehlung: ""},
+			800: {icon:"wi-day-sunny", description:"klarer Himmel", empfehlung: ""},
+			801: {icon:"wi-day-cloudy", description:"leicht bewölkt", empfehlung: ""},
+			802: {icon:"wi-cloudy", description:"leicht bewölkt", empfehlung: ""},
+			803: {icon:"wi-cloudy", description:"bewölkt", empfehlung: ""},
+			804: {icon:"wi-fog", description:"bedekt", empfehlung: ""},
+			500: {icon:"wi-day-rain-mix", description:"leichter Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			501: {icon:"wi-day-showers", description:"Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			502: {icon:"wi-day-rain", description:"starker Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			503: {icon:"wi-day-rain", description:"sehr starker Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			504: {icon:"wi-day-rain", description:"sehr starker Niederschlag", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			511: {icon:"wi-day-hail", description:"gefrierender Regen", empfehlung: "Und Achtung, es kann glatt werden."},
+			520: {icon:"wi-day-showers", description:"leichte Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			521: {icon:"wi-day-showers", description:"Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			522: {icon:"wi-day-showers", description:"starker Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			531: {icon:"wi-day-showers", description:"starker Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."}
 		},
 		night:{
-			951: "wi-night-clear",
-			952: "wi-night-clear",
-			953: "wi-night-alt-cloudy-windy",
-			954: "wi-night-alt-cloudy-gusts",
-			955: "wi-night-alt-cloudy-gusts",
-			956: "wi-night-alt-cloudy-gusts",
-			957: "wi-night-alt-cloudy-gusts",
-			958: "wi-night-alt-cloudy-gusts",
-			959: "wi-night-alt-cloudy-gusts",
-			960: "wi-night-alt-storm-showers",
-			961: "wi-night-alt-thunderstorm",
-			962: "wi-night-alt-thunderstorm",
-			800: "wi-night-cloudy",
-			801: "wi-night-cloudy",
-			802: "wi-cloudy",
-			803: "wi-cloudy",
-			804: "wi-fog",
-			500: "wi-night-alt-rain-mix",
-			501: "wi-night-alt-showers",
-			502: "wi-night-alt-rain",
-			503: "wi-night-alt-rain",
-			504: "wi-night-alt-rain",
-			511: "wi-night-alt-hail",
-			520: "wi-night-alt-showers",
-			521: "wi-night-alt-showers",
-			522: "wi-night-alt-showers",
-			531: "wi-night-alt-showers"
+			951: {icon:"wi-night-clear", description:"ruhig", empfehlung: ""},
+			952: {icon:"wi-night-clear", description:"leichte Briese", empfehlung: ""},
+			953: {icon:"wi-night-alt-cloudy-windy", description:"leichte Briese", empfehlung: ""},
+			954: {icon:"wi-night-alt-cloudy-gusts", description:"windig", empfehlung: ""},
+			955: {icon:"wi-night-alt-cloudy-gusts", description:"windig", empfehlung: ""},
+			956: {icon:"wi-night-alt-cloudy-gusts", description:"windig", empfehlung: ""},
+			957: {icon:"wi-night-alt-cloudy-gusts", description:"starker Wind", empfehlung: ""},
+			958: {icon:"wi-night-alt-cloudy-gusts", description:"starker Wind", empfehlung: ""},
+			959: {icon:"wi-night-alt-cloudy-gusts", description:"starke Böen", empfehlung: ""},
+			960: {icon:"wi-night-alt-storm-showers", description:"sehr starke Böen", empfehlung: ""},
+			961: {icon:"wi-night-alt-thunderstorm", description:"Gewitter", empfehlung: ""},
+			962: {icon:"wi-night-alt-thunderstorm", description:"Gewitter", empfehlung: ""},
+			800: {icon:"wi-night-cloudy", description:"klarer Himmel", empfehlung: ""},
+			801: {icon:"wi-night-cloudy", description:"leicht bewölkt", empfehlung: ""},
+			802: {icon:"wi-cloudy", description:"leicht bewölkt", empfehlung: ""},
+			803: {icon:"wi-cloudy", description:"bewölkt", empfehlung: ""},
+			804: {icon:"wi-fog", description:"bedekt", empfehlung: ""},
+			500: {icon:"wi-night-alt-rain-mix", description:"leichter Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			501: {icon:"wi-night-alt-showers", description:"Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			502: {icon:"wi-night-alt-rain", description:"starker Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			503: {icon:"wi-night-alt-rain", description:"sehr starker Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			504: {icon:"wi-night-alt-rain", description:"sehr starker Regen", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			511: {icon:"wi-night-alt-hail", description:"gefrierender Regen", empfehlung: "Und Achtung, es kann glatt werden."},
+			520: {icon:"wi-night-alt-showers", description:"leichte Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			521: {icon:"wi-night-alt-showers", description:"Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			522: {icon:"wi-night-alt-showers", description:"starker Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."},
+			531: {icon:"wi-night-alt-showers", description:"starker Schauer", empfehlung: "Und vergessen Sie nicht einen Regenschirm einzupacken."}
 		}
 	}
 	
@@ -126,18 +129,16 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 		
 		$http.get('http://api.openweathermap.org/data/2.5/forecast?lat='+transform(theArray[index].from.lat)+'&lon='+transform(theArray[index].from.lon)).success(function(result){
 			theArray[index].from.weather=result;
-			console.log("From", result);
 		});
 		$http.get('http://api.openweathermap.org/data/2.5/forecast?lat='+transform(theArray[index].to.lat)+'&lon='+transform(theArray[index].to.lon)).success(function(result){
 			theArray[index].to.weather=result;
-			console.log("To", result);
 		});
 		
 	};
 	
 	$scope.suche = function(){
-		$scope.loadingTrips = true;
-		window.setTimeout(function(){
+		if ($scope.von.length>0&&$scope.nach.length>0){
+			$scope.loadingTrips = true;
 			$http.get($scope.queryTrips($scope.vonMap[$scope.von].id,$scope.nachMap[$scope.nach].id)).success(function(result){
 				if (!$scope.live)
 					result = {"header":{"network":"DB","serverProduct":"hafas","serverVersion":"6","serverTime":0,"context":null},"status":"OK","ambiguousFrom":null,"ambiguousVia":null,"ambiguousTo":null,"queryUri":"http://reiseauskunft.bahn.de/bin/query.exe/dn?start=Suchen&REQ0JourneyStopsS0ID=A%3D1%40L%3D8096009&REQ0JourneyStopsZ0ID=A%3D1%40L%3D8000050&REQ0HafasSearchForw=1&REQ0JourneyDate=21.03.15&REQ0JourneyTime=01%3A31&REQ0JourneyProduct_prod_list_1=11000000000000&h2g-direct=11&clientType=ANDROID","from":{"type":"STATION","id":"8096009","lat":0,"lon":0,"place":null,"name":null,"identified":true},"via":null,"to":{"type":"STATION","id":"8000050","lat":0,"lon":0,"place":null,"name":null,"identified":true},"context":{"ident":"d7.023275243.1426897900","seqNr":1,"ld":"96243","usedBufferSize":1928},"trips":[{"id":"C0-0","from":{"type":"STATION","id":null,"lat":53557110,"lon":9997434,"place":null,"name":"HAMBURG","identified":false},"to":{"type":"STATION","id":null,"lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":false},"legs":[{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC7","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909320000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"13","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909320000,"maxTime":null,"departureTime":1426909320000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426912620000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"9","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426912620000,"departureTime":null,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909980000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909980000,"maxTime":null,"departureTime":1426909980000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426909320000,"maxTime":1426912620000,"departureTime":1426909320000,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false}],"fares":null,"capacity":null,"numChanges":0,"duration":3300000,"minTime":1426909320000,"lastPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC7","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909320000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"13","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909320000,"maxTime":null,"departureTime":1426909320000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426912620000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"9","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426912620000,"departureTime":null,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909980000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909980000,"maxTime":null,"departureTime":1426909980000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426909320000,"maxTime":1426912620000,"departureTime":1426909320000,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false},"firstPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC7","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909320000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"13","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909320000,"maxTime":null,"departureTime":1426909320000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426912620000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"9","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426912620000,"departureTime":null,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426909980000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426909980000,"maxTime":null,"departureTime":1426909980000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426909320000,"maxTime":1426912620000,"departureTime":1426909320000,"arrivalTime":1426912620000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"13","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"9","section":null},"arrivalPositionPredicted":false},"lastPublicLegArrivalTime":1426912620000,"firstDepartureTime":1426909320000,"publicDuration":3300000,"lastArrivalTime":1426912620000,"maxTime":1426912620000,"travelable":true,"firstPublicLegDepartureTime":1426909320000},{"id":"C0-1","from":{"type":"STATION","id":null,"lat":53557110,"lon":9997434,"place":null,"name":"HAMBURG","identified":false},"to":{"type":"STATION","id":null,"lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":false},"legs":[{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"ICE27","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":null,"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913160000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913160000,"maxTime":null,"departureTime":1426913160000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426916460000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426916460000,"departureTime":null,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913820000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913820000,"maxTime":null,"departureTime":1426913820000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426913160000,"maxTime":1426916460000,"departureTime":1426913160000,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false}],"fares":null,"capacity":null,"numChanges":0,"duration":3300000,"minTime":1426913160000,"lastPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"ICE27","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":null,"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913160000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913160000,"maxTime":null,"departureTime":1426913160000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426916460000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426916460000,"departureTime":null,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913820000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913820000,"maxTime":null,"departureTime":1426913820000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426913160000,"maxTime":1426916460000,"departureTime":1426913160000,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"firstPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"ICE27","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":null,"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913160000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913160000,"maxTime":null,"departureTime":1426913160000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426916460000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426916460000,"departureTime":null,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426913820000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426913820000,"maxTime":null,"departureTime":1426913820000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426913160000,"maxTime":1426916460000,"departureTime":1426913160000,"arrivalTime":1426916460000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"lastPublicLegArrivalTime":1426916460000,"firstDepartureTime":1426913160000,"publicDuration":3300000,"lastArrivalTime":1426916460000,"maxTime":1426916460000,"travelable":true,"firstPublicLegDepartureTime":1426913160000},{"id":"C0-2","from":{"type":"STATION","id":null,"lat":53557110,"lon":9997434,"place":null,"name":"HAMBURG","identified":false},"to":{"type":"STATION","id":null,"lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":false},"legs":[{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC9","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426916760000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426916760000,"maxTime":null,"departureTime":1426916760000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426920060000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426920060000,"departureTime":null,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426917420000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426917420000,"maxTime":null,"departureTime":1426917420000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426916760000,"maxTime":1426920060000,"departureTime":1426916760000,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false}],"fares":null,"capacity":null,"numChanges":0,"duration":3300000,"minTime":1426916760000,"lastPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC9","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426916760000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426916760000,"maxTime":null,"departureTime":1426916760000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426920060000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426920060000,"departureTime":null,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426917420000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426917420000,"maxTime":null,"departureTime":1426917420000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426916760000,"maxTime":1426920060000,"departureTime":1426916760000,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"firstPublicLeg":{"departure":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"arrival":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"path":null,"line":{"id":null,"network":null,"product":"HIGH_SPEED_TRAIN","label":"EC9","style":{"shape":"RECT","backgroundColor":-1,"foregroundColor":-65536,"borderColor":-65536},"attrs":["BICYCLE_CARRIAGE"],"message":null},"destination":null,"departureStop":{"location":{"type":"STATION","id":"8002549","lat":53552732,"lon":10006908,"place":null,"name":"Hamburg Hbf","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":null,"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426916760000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"14","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426916760000,"maxTime":null,"departureTime":1426916760000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":null,"arrivalPositionPredicted":false},"arrivalStop":{"location":{"type":"STATION","id":"8000050","lat":53083477,"lon":8813833,"place":null,"name":"Bremen Hbf","identified":true},"plannedArrivalTime":1426920060000,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"8","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":null,"predictedDepartureTime":null,"plannedDeparturePosition":null,"predictedDeparturePosition":null,"departureCancelled":false,"minTime":null,"maxTime":1426920060000,"departureTime":null,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":null,"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"intermediateStops":[{"location":{"type":"STATION","id":"8000147","lat":53455909,"lon":9991698,"place":null,"name":"Hamburg-Harburg","identified":true},"plannedArrivalTime":null,"predictedArrivalTime":null,"plannedArrivalPosition":{"name":"3","section":null},"predictedArrivalPosition":null,"arrivalCancelled":false,"plannedDepartureTime":1426917420000,"predictedDepartureTime":null,"plannedDeparturePosition":{"name":"3","section":null},"predictedDeparturePosition":null,"departureCancelled":false,"minTime":1426917420000,"maxTime":null,"departureTime":1426917420000,"arrivalTime":null,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"3","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"3","section":null},"arrivalPositionPredicted":false}],"message":null,"minTime":1426916760000,"maxTime":1426920060000,"departureTime":1426916760000,"arrivalTime":1426920060000,"departureTimePredicted":false,"departureDelay":null,"departurePosition":{"name":"14","section":null},"departurePositionPredicted":false,"arrivalTimePredicted":false,"arrivalDelay":null,"arrivalPosition":{"name":"8","section":null},"arrivalPositionPredicted":false},"lastPublicLegArrivalTime":1426920060000,"firstDepartureTime":1426916760000,"publicDuration":3300000,"lastArrivalTime":1426920060000,"maxTime":1426920060000,"travelable":true,"firstPublicLegDepartureTime":1426916760000}]};
@@ -150,9 +151,7 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 			}).error(function(){
 				$scope.loadingTrips = false;
 			});
-			
-		}, 1000);
-		
+		}
 	};
 	$scope.fill = function(c) {
 		if (c<10)
@@ -163,12 +162,12 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 	$scope.tag = function(z) {
 		var d = new Date(z);
 		var tage = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-		return tage[d.getDay()] + ", " + $scope.fill(d.getDate()) + "." + $scope.fill(d.getMonth()+1) + "." + $scope.fill(d.getYear());
+		return tage[d.getDay()] + ", " + $scope.fill(d.getDate()) + "." + $scope.fill(d.getMonth()+1) + "." + $scope.fill(d.getFullYear());
 	}
 	
 	$scope.zeit = function(z) {
 		var d = new Date(z);
-		return $scope.fill(d.getHours()) + ":"+ $scope.fill(d.getMinutes()) + ":"+ $scope.fill(d.getSeconds());
+		return $scope.fill(d.getHours()) + ":"+ $scope.fill(d.getMinutes());
 	}
 	
 	$scope.duration = function(z) {
@@ -177,7 +176,7 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 			return count>0?count + " " + (count > 1?namePlur:nameSing):"";
 		}
 		
-		return diff(d.getFullYear()-1970,"Jahr", "Jahre") + " " + diff(d.getMonth(),"Monat", "Monate") + " " + diff(d.getDate(),"Tag", "Tage") + " " + diff(d.getHours(),"Stunde", "Stunden") + " " + diff(d.getMinutes(),"Minute", "Minuten") + " " + diff(d.getSeconds(),"Sekunde", "Sekunden");
+		return diff( Math.floor(z/(1000*60*60*24)),"Tag", "Tage" )+ " " + diff(d.getHours(),"Stunde", "Stunden") + " " + diff(d.getMinutes(),"Minute", "Minuten") + " " + diff(d.getSeconds(),"Sekunde", "Sekunden");
 	}
 	
 	$scope.weatherIcon = function (weather, z){
@@ -187,7 +186,6 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 		var tod = "night";
 		if ((d.getHours()>=7) && (d.getHours()<=18))
 			tod="day";
-		console.log(d, weather);
 		
 		var closest = 0;
 		weather.list.forEach(function (w, n){
@@ -195,7 +193,50 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 				closest = n;
 		});
 		
-		return $scope.weatherMap[tod][weather.list[closest].weather[0].id];
+		var icon = $scope.weatherMap[tod][weather.list[closest].weather[0].id].icon;
+		
+		
+		return icon?icon:"";
+	}
+	
+	$scope.weatherDescription = function (weather, z){
+		if (typeof weather === "undefined")
+			return "";
+		var d = new Date(z);
+		var tod = "night";
+		if ((d.getHours()>=7) && (d.getHours()<=18))
+			tod="day";
+		
+		var closest = 0;
+		weather.list.forEach(function (w, n){
+			if (w.dt-z<weather.list[closest].dt-z)
+				closest = n;
+		});
+		
+		var description = $scope.weatherMap[tod][weather.list[closest].weather[0].id].description;
+		
+		
+		return description?description:"";
+	}
+	
+	$scope.weatherSupport = function (weather, z){
+		if (typeof weather === "undefined")
+			return "";
+		var d = new Date(z);
+		var tod = "night";
+		if ((d.getHours()>=7) && (d.getHours()<=18))
+			tod="day";
+		
+		var closest = 0;
+		weather.list.forEach(function (w, n){
+			if (w.dt-z<weather.list[closest].dt-z)
+				closest = n;
+		});
+		
+		var description = $scope.weatherMap[tod][weather.list[closest].weather[0].id].empfehlung;
+		
+		
+		return description?description:"";
 	}
 	
 	$scope.weatherInfo = function (weather, z){
@@ -211,5 +252,20 @@ angular.module('dbhackathon', ['autocomplete', 'ngAnimate']).controller('dbhacka
 		return (weather.list[closest].main.temp-$scope.absZero).toFixed(1)+" °C";
 	}
 
+	
+	$scope.delayCalc = function(z) {
+		return Math.round(z);
+	}
+	
+	$scope.calcRatio = function(z) {
+		return (z*100).toFixed(0);
+	}
+	
+	$scope.parseTransfertime = function (z){
+		if (z>0)
+			return "Umstiegszeit: "+z+" Minuten.";
+		else
+			return "Keine Umstiegszeit vorhanden.";
+	}
 
 }]);

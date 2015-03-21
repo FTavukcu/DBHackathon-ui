@@ -215,12 +215,12 @@ app.directive('autocomplete', function() {
             // scope.preSelectOff();
             if(index !== -1) {
               scope.select(angular.element(angular.element(this).find('li')[index]).text());
-              if(keycode == key.enter) {
+              if((keycode == key.enter)||(keycode == key.tab)) {
                 e.preventDefault();
               }
             } else {
-              if(keycode == key.enter) {
-                scope.select();
+              if((keycode == key.enter)||(keycode == key.tab)) {
+                scope.select(angular.element(angular.element(this).find('li')[0]).text());
               }
             }
             scope.setIndex(-1);
